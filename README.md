@@ -1,8 +1,8 @@
 # PingMonitor
 
 Ein schlankes Python-Tool, das eine oder mehrere IP-Adressen pingt, jedes Ergebnis
-protokolliert und bei nicht erreichbaren Hosts eine E-Mail-Warnung ueber die
-**Microsoft Graph API (Outlook)** versendet. Gedacht fuer den unbeaufsichtigten
+protokolliert und bei nicht erreichbaren Hosts eine E-Mail-Warnung über die
+**Microsoft Graph API (Outlook)** versendet. Gedacht für den unbeaufsichtigten
 Betrieb als Windows-Dienst via [NSSM](https://nssm.cc/).
 
 ## Funktionsweise
@@ -11,18 +11,18 @@ Pro Aufruf wird jeder konfigurierte Host einmal gepingt:
 
 - **Erreichbar:** Ergebnis wird geloggt, sonst passiert nichts.
 - **Nicht erreichbar:** Ergebnis wird geloggt und eine Alarm-E-Mail versandt –
-  sofern das Rate-Limit (siehe unten) dies zulaesst.
+  sofern das Rate-Limit (siehe unten) dies zulässt.
 
-Das Skript fuehrt bewusst **genau einen Durchlauf** pro Aufruf aus. Die
-wiederkehrende Ausfuehrung uebernimmt extern NSSM.
+Das Skript führt bewusst **genau einen Durchlauf** pro Aufruf aus. Die
+wiederkehrende Ausführung übernimmt extern NSSM.
 
 ### Rate-Limit (Anti-Spam)
 
-Vor dem Versand wird geprueft, wann zuletzt eine E-Mail fuer den jeweiligen Host
-gesendet wurde. Liegt das weniger als `rate_limit_hours` (Standard: 24 h) zurueck,
+Vor dem Versand wird geprüft, wann zuletzt eine E-Mail für den jeweiligen Host
+gesendet wurde. Liegt das weniger als `rate_limit_hours` (Standard: 24 h) zurück,
 wird **kein** weiterer Alarm gesendet – der fehlgeschlagene Ping wird aber
 trotzdem protokolliert. Die Zeitstempel liegen in einer kleinen Zustandsdatei
-(`state.json`), bewusst getrennt vom Log, damit Log-Rotation die Logik nicht stoert.
+(`state.json`), bewusst getrennt vom Log, damit Log-Rotation die Logik nicht stört.
 
 ## Projektstruktur
 
@@ -34,8 +34,8 @@ pingmonitor/
 ├── config.py            # TOML + .env laden und validieren
 ├── pinger.py            # Ping via icmplib mit System-Ping-Fallback
 ├── notifier.py          # Microsoft-Graph-Auth und E-Mail-Versand
-├── state.py             # JSON-Zustand fuer Rate-Limit
-└── logging_setup.py     # Logging mit groessenbasierter Rotation
+├── state.py             # JSON-Zustand für Rate-Limit
+└── logging_setup.py     # Logging mit größenbasierter Rotation
 config.example.toml      # Beispielkonfiguration
 .env.example             # Beispiel-Geheimnisse
 requirements.txt
@@ -45,8 +45,8 @@ requirements.txt
 
 TOML wird ab Python 3.11 ohne Zusatzpaket gelesen (`tomllib`), ist streng typisiert
 (echte Zahlen/Booleans statt YAML-Mehrdeutigkeiten) und bildet die Hostliste mit
-`[[hosts]]`-Tabellen natuerlich ab. YAML braeuchte eine zusaetzliche Abhaengigkeit
-ohne echten Mehrwert fuer diesen Anwendungsfall.
+`[[hosts]]`-Tabellen natürlich ab. YAML bräuchte eine zusätzliche Abhängigkeit
+ohne echten Mehrwert für diesen Anwendungsfall.
 
 ## Installation
 
@@ -68,7 +68,7 @@ pip install -r requirements.txt
    Copy-Item config.example.toml config.toml
    ```
 
-   Hosts, Empfaenger, Absender und Ping-Parameter anpassen.
+   Hosts, Empfänger, Absender und Ping-Parameter anpassen.
 
 2. **Geheimnisse hinterlegen:**
 
@@ -92,7 +92,7 @@ In Azure AD eine App registrieren und ihr die **Application Permission**
 `Mail.Send` erteilen (mit Admin-Zustimmung). Der `sender` in der Konfiguration muss
 ein Postfach sein, in dessen Namen die App senden darf.
 
-## Ausfuehren
+## Ausführen
 
 ```powershell
 python -m pingmonitor
@@ -104,33 +104,33 @@ Exit-Codes: `0` = Durchlauf ok, `2` = Konfigurationsfehler.
 
 ## Ping-Methode und Rechte
 
-Standardmaessig wird **icmplib** verwendet. Diese Bibliothek nutzt Raw-Sockets und
-benoetigt unter **Windows Administratorrechte** (bzw. root unter Linux/macOS).
+Standardmäßig wird **icmplib** verwendet. Diese Bibliothek nutzt Raw-Sockets und
+benötigt unter **Windows Administratorrechte** (bzw. root unter Linux/macOS).
 
-Damit das Tool auch **ohne erhoehte Rechte** laeuft, gibt es einen Fallback: Im
-Modus `method = "auto"` (Standard) wird zunaechst icmplib versucht; fehlen die
-noetigen Rechte, weicht PingMonitor automatisch auf das mitgelieferte
+Damit das Tool auch **ohne erhöhte Rechte** läuft, gibt es einen Fallback: Im
+Modus `method = "auto"` (Standard) wird zunächst icmplib versucht; fehlen die
+nötigen Rechte, weicht PingMonitor automatisch auf das mitgelieferte
 Betriebssystem-Kommando `ping` aus, das ohne Adminrechte funktioniert.
 
-Mit `method = "system"` laesst sich der Fallback erzwingen, mit `method = "icmplib"`
-ausschliesslich icmplib verwenden.
+Mit `method = "system"` lässt sich der Fallback erzwingen, mit `method = "icmplib"`
+ausschließlich icmplib verwenden.
 
-> Hinweis: Der System-Ping liefert weniger Detailmetriken (nur Erreichbarkeit ueber
-> den Exit-Code), reicht fuer die Alarmierung aber vollkommen aus.
+> Hinweis: Der System-Ping liefert weniger Detailmetriken (nur Erreichbarkeit über
+> den Exit-Code), reicht für die Alarmierung aber vollkommen aus.
 
 ## Logging und Rotation
 
-- Speicherort konfigurierbar ueber `logging.path` (Standard: `logs/pingmonitor.log`).
+- Speicherort konfigurierbar über `logging.path` (Standard: `logs/pingmonitor.log`).
 - Geloggt wird gleichzeitig in die Datei und auf die Konsole.
-- **Groessenbasierte Rotation:** Erreicht die Datei `max_bytes` (Standard 5 MB), wird
+- **Größenbasierte Rotation:** Erreicht die Datei `max_bytes` (Standard 5 MB), wird
   sie rotiert; es werden bis zu `backup_count` Altdateien (`.1` … `.5`) aufbewahrt,
-  aeltere automatisch geloescht. So bleibt der Plattenverbrauch ohne externen
+  ältere automatisch gelöscht. So bleibt der Plattenverbrauch ohne externen
   Cron-Job begrenzt.
 - Format: `Zeitstempel | Level | Modul | Nachricht` – menschenlesbar und parsebar.
 
 ## Deployment als Windows-Dienst mit NSSM
 
-PingMonitor enthaelt keine eigene Scheduling-Logik. Fuer den wiederkehrenden Betrieb
+PingMonitor enthält keine eigene Scheduling-Logik. Für den wiederkehrenden Betrieb
 empfiehlt sich eine geplante Aufgabe oder ein Dienst via NSSM.
 
 1. **NSSM installieren** (z. B. nach `C:\Tools\nssm`).
@@ -142,14 +142,14 @@ empfiehlt sich eine geplante Aufgabe oder ein Dienst via NSSM.
    nssm set PingMonitor AppDirectory "C:\PingMonitor"
    ```
 
-3. **Da das Skript pro Aufruf nur einmal laeuft**, gibt es zwei gaengige Varianten:
+3. **Da das Skript pro Aufruf nur einmal läuft**, gibt es zwei gängige Varianten:
 
    - **Geplante Aufgabe (empfohlen, einfacher):** Den Aufruf
-     `python -m pingmonitor` per Windows-Aufgabenplanung im gewuenschten Intervall
-     (z. B. alle 5 Minuten) starten. NSSM ist dann nicht zwingend noetig.
+     `python -m pingmonitor` per Windows-Aufgabenplanung im gewünschten Intervall
+     (z. B. alle 5 Minuten) starten. NSSM ist dann nicht zwingend nötig.
 
    - **NSSM mit Wrapper-Schleife:** Ein kleines Skript pingt in einer Schleife mit
-     `Start-Sleep`. NSSM startet dieses Wrapper-Skript und haelt es am Leben:
+     `Start-Sleep`. NSSM startet dieses Wrapper-Skript und hält es am Leben:
 
      ```powershell
      # loop.ps1
@@ -166,7 +166,7 @@ empfiehlt sich eine geplante Aufgabe oder ein Dienst via NSSM.
 
 4. **Rechte beachten:** Soll icmplib (Raw-Sockets) statt des Fallbacks genutzt
    werden, muss der Dienst unter einem Konto mit Administratorrechten
-   (z. B. `LocalSystem`) laufen. Andernfalls genuegt der `auto`-/`system`-Modus.
+   (z. B. `LocalSystem`) laufen. Andernfalls genügt der `auto`-/`system`-Modus.
 
 5. **Dienst starten:**
 
@@ -176,9 +176,9 @@ empfiehlt sich eine geplante Aufgabe oder ein Dienst via NSSM.
 
 ## Fehlerbehandlung
 
-- **Konfigurationsfehler** (fehlende Datei, ungueltiges TOML, fehlende Secrets)
+- **Konfigurationsfehler** (fehlende Datei, ungültiges TOML, fehlende Secrets)
   werden vor dem Start abgefangen und mit Exit-Code `2` gemeldet.
 - **Netzwerk-/Ping-Fehler** eines Hosts brechen den Gesamtdurchlauf nicht ab – die
-  uebrigen Hosts werden weiter geprueft.
+  übrigen Hosts werden weiter geprüft.
 - **Auth-/Versandfehler** bei Graph werden geloggt; der Zeitstempel wird in diesem
-  Fall **nicht** gesetzt, sodass beim naechsten Lauf erneut versucht wird.
+  Fall **nicht** gesetzt, sodass beim nächsten Lauf erneut versucht wird.
