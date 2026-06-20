@@ -1,0 +1,45 @@
+# Beispielkonfiguration fuer PingMonitor.
+# Kopieren nach "config.toml" und an die eigene Umgebung anpassen.
+# Geheimnisse (Graph-Credentials) gehoeren NICHT hierher, sondern in die .env-Datei.
+
+# --- Zu ueberwachende Hosts ---------------------------------------------------
+# Beliebig viele [[hosts]]-Bloecke. "name" ist optional und wird in der
+# E-Mail-Betreffzeile verwendet; fehlt er, dient die IP als Anzeigename.
+[[hosts]]
+ip = "1.1.1.1"
+name = "Kamera_1"
+
+[[hosts]]
+ip = "8.8.8.8"
+name = "DNS_Google"
+
+[[hosts]]
+ip = "192.168.1.10"
+# ohne name -> in E-Mails erscheint die IP
+
+# --- Ping-Parameter -----------------------------------------------------------
+[ping]
+count = 4          # Anzahl der Pings pro Host
+timeout = 2        # Timeout pro Ping in Sekunden
+method = "auto"    # "auto" | "icmplib" | "system"
+                   # auto: icmplib, bei fehlenden Rechten Fallback auf System-Ping
+
+# --- Alarmierung / Rate-Limit -------------------------------------------------
+[alerts]
+rate_limit_hours = 24                      # min. Abstand zwischen E-Mails je Host
+recipients = ["ops@example.com", "admin@example.com"]
+
+# --- Microsoft Graph (Outlook) ------------------------------------------------
+[graph]
+sender = "monitor@example.com"             # Absenderadresse (Postfach der App)
+
+# --- Logging ------------------------------------------------------------------
+[logging]
+path = "logs/pingmonitor.log"  # Speicherort der Logdatei
+level = "INFO"                 # DEBUG | INFO | WARNING | ERROR
+max_bytes = 5242880            # 5 MB pro Datei, danach Rotation
+backup_count = 5               # Anzahl archivierter Altdateien (.1 ... .5)
+
+# --- Zustand (Rate-Limit-Zeitstempel) -----------------------------------------
+[state]
+path = "state.json"            # speichert "zuletzt alarmiert" je Host

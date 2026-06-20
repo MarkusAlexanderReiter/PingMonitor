@@ -1,0 +1,23 @@
+# Secrets und lokale Konfiguration
+.env
+config.toml
+
+# Laufzeit-Zustand und Logs
+state.json
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
